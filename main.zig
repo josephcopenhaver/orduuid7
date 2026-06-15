@@ -8,42 +8,60 @@ pub const panic = std.debug.FullPanic(struct {
 
 const hex = "0123456789abcdef";
 
-fn id(io: std.Io) ![16]u8 {
-    var v: [16]u8 = undefined;
+fn id_buf(io: std.Io) ![33]u8 {
+    var v: [33]u8 = undefined;
 
-    const now = std.Io.Clock.now(.real, io);
-    const ms: u64 = @intCast(@divFloor(now.nanoseconds, std.time.ns_per_ms));
+    var dst: u8 = 0;
 
-    v[0] = @truncate(ms >> 40);
-    v[1] = @truncate(ms >> 32);
-    v[2] = @truncate(ms >> 24);
-    v[3] = @truncate(ms >> 16);
-    v[4] = @truncate(ms >> 8);
-    v[5] = @truncate(ms);
+    // load time as hex into buf v
+    {
+        const now = std.Io.Clock.now(.real, io);
+        const ms: u64 = @intCast(@divFloor(now.nanoseconds, std.time.ns_per_ms));
 
-    try std.Io.randomSecure(io, v[6..]);
+        var bshift: u6 = 40;
+        while (true) {
+            const b: u8 = @truncate(ms >> bshift);
 
-    v[15] = (v[15] & 0xc0) | 0x27;
+            v[dst] = hex[b >> 4];
+            dst += 1;
+            v[dst] = hex[b & 0x0f];
+            dst += 1;
+
+            if (bshift < 8) {
+                break;
+            }
+
+            bshift -= 8;
+        }
+    }
+
+    var src: u8 = 22;
+    try std.Io.randomSecure(io, v[src..32]);
+
+    while (true) {
+        const b = v[src];
+        src += 1;
+
+        v[dst] = hex[b >> 4];
+        dst += 1;
+        v[dst] = hex[b & 0x0f];
+        dst += 1;
+
+        if (src >= 31) {
+            break;
+        }
+    }
+
+    v[30] = hex[(v[src] & 0x0c) | 0x02];
+    v[31] = '7';
+    v[32] = '\n';
 
     return v;
 }
 
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
-    const x = try id(io);
-
-    var buf: [33]u8 = undefined;
-
-    var i: usize = 0;
-    while (i < 16) : (i+=1) {
-        const dst = i * 2;
-        const v = x[i];
-
-        buf[dst] = hex[v >> 4];
-        buf[dst + 1] = hex[v & 0x0f];
-    }
-
-    buf[32] = '\n';
+    const buf = try id_buf(io);
 
     try std.Io.File.stdout().writeStreamingAll(io, &buf);
 }
