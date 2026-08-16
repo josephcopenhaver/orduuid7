@@ -33,7 +33,7 @@ main() {
 
   rm -rf dist build
 
-  local version='v0.2.2'
+  local version='v0.2.0'
   local bin_name=orduuid7
   local obj='build/.obj'
 
