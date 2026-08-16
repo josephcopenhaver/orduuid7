@@ -1,0 +1,8 @@
+; The four kernel32 functions this program imports. llvm-dlltool turns this
+; into an import library at build time, so no mingw or SDK is needed.
+LIBRARY kernel32.dll
+EXPORTS
+ExitProcess
+GetStdHandle
+GetSystemTimeAsFileTime
+WriteFile

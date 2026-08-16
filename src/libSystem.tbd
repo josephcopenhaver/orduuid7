@@ -1,0 +1,14 @@
+--- !tapi-tbd
+# Minimal text stub for /usr/lib/libSystem.B.dylib declaring only the three
+# symbols this program uses. It exists so ld64.lld can cross-link the macOS
+# binaries from any host with no Apple SDK; on a Mac, Apple's real stubs are
+# used instead. The dylib itself always exports these, so the versions here
+# only need to be plausible, not exact.
+tbd-version: 4
+targets: [ x86_64-macos, arm64-macos ]
+install-name: '/usr/lib/libSystem.B.dylib'
+current-version: 1319.0.0
+exports:
+  - targets: [ x86_64-macos, arm64-macos ]
+    symbols: [ _clock_gettime, _getentropy, _write ]
+...

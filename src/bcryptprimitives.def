@@ -1,0 +1,5 @@
+; ProcessPrng is the kernel-seeded PRNG behind BCryptGenRandom, minus the
+; bcrypt.dll wrapper. llvm-dlltool turns this into an import library.
+LIBRARY bcryptprimitives.dll
+EXPORTS
+ProcessPrng
