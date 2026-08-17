@@ -7,7 +7,7 @@
 FROM debian:trixie-slim
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends clang lld llvm \
+    && apt-get install -y --no-install-recommends clang lld llvm zip \
     && rm -rf /var/lib/apt/lists/* \
     && ln -s /usr/lib/llvm-*/bin/ld64.lld /usr/local/bin/ld64.lld
 

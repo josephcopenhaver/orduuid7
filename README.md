@@ -87,8 +87,9 @@ Builds happen inside a Debian container (see `Dockerfile`), so the only host
 requirement is Docker; every target cross-compiles from any host. The
 implementation is hand-written assembly per target (`src/*.s`) assembled by
 clang and linked by lld; `src/*.def` and `src/libSystem.tbd` replace the
-Windows and Apple SDKs. Outputs land in `build/<version>/` with tarballs and
-sha256 digests in `dist/`.
+Windows and Apple SDKs. Outputs land in `build/<version>/`; `dist/` holds
+the packages — `.zip` for windows, `.tar.gz` for everything else — each with
+a sha256 digest.
 
 | Target          | Size (bytes) | How static                                        |
 | --------------- | -----------: | ------------------------------------------------- |

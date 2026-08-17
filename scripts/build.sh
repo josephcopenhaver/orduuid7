@@ -86,11 +86,12 @@ main() {
   # construct binary digests
   find build -type f \( -name "$bin_name" -o -name "$bin_name.exe" \) | xargs -n 1 bash -sc 'cd "${1%/*}" ; sha256sum "${1##*/}" > "${1##*/}.sha256"' ''
 
-  # construct binary packages
-  find build -type f \( -name "$bin_name" -o -name "$bin_name.exe" \) | sed -E 's/^build\///' | xargs -n 1 bash -sc 'b="${1##*/}" ; d="${1%/*}" ; tar -cf - -C "build/$d" "$b" "$b.sha256" | gzip -9 > "dist/${b%.exe}-$(sed -E '\''s/\//-/g'\'' <<<"$d").tar.gz"' ''
+  # construct binary packages: .zip for windows, .tar.gz for everything else
+  find build -type f -name "$bin_name" | sed -E 's/^build\///' | xargs -n 1 bash -sc 'b="${1##*/}" ; d="${1%/*}" ; tar -cf - -C "build/$d" "$b" "$b.sha256" | gzip -9 > "dist/$b-$(sed -E '\''s/\//-/g'\'' <<<"$d").tar.gz"' ''
+  find build -type f -name "$bin_name.exe" | sed -E 's/^build\///' | xargs -n 1 bash -sc 'b="${1##*/}" ; d="${1%/*}" ; zip -9 -X -j -q "dist/${b%.exe}-$(sed -E '\''s/\//-/g'\'' <<<"$d").zip" "build/$d/$b" "build/$d/$b.sha256"' ''
 
   # construct binary package digests
-  find dist -type f -name '*.tar.gz' | xargs -n 1 bash -sc 'fname="${1##*/}" ; cd dist ; sha256sum "$fname" > "$fname.sha256"' ''
+  find dist -type f \( -name '*.tar.gz' -o -name '*.zip' \) | xargs -n 1 bash -sc 'fname="${1##*/}" ; cd dist ; sha256sum "$fname" > "$fname.sha256"' ''
 }
 
 (main "$@") && exit 0 || exit $?
